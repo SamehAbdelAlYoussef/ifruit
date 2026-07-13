@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('pos-receipt')]" position="replace">
+            <div class="fruit-pos-receipt pos-receipt">
+                <t t-if="order.company.logo">
+                    <img class="pos-receipt-logo" t-att-src="order.company.logo" alt="Logo"/>
+                </t>
+
+                <table class="fruit_order_data">
+                    <tr>
+                        <td class="fruit_order_data"><t t-out="order.name" /></td>
+                        <td class="fruit_order_tital">نوع الفاتورة</td>
+                    </tr>
+                    <tr>
+                        <td class="fruit_order_data">
+                            <t t-out="order.formatDateOrTime('date_order', 'date')" />
+                        </td>
+                        <td class="fruit_order_tital">تاريخ</td>
+                    </tr>
+                    <tr>
+                        <td class="fruit_order_data"><t t-out="order.getCashierName()" /></td>
+                        <td class="fruit_order_tital">كاشير</td>
+                    </tr>
+                </table>
+                <br/>
+                <div class="fruit_order_line_table">
+                    <table class="fruit_order_line_data">
+                        <tr>
+                            <th class="pos-receipt-center-align">اجمالى</th>
+                            <th class="pos-receipt-center-align">سعر</th>
+                            <th class="pos-receipt-center-align">كمية</th>
+                            <th class="pos-receipt-center-align">اسم المنتج</th>
+                            <th class="pos-receipt-center-align">عدد</th>
+                        </tr>
+                        <t t-set="line_count" t-value="0"/>
+                        <t t-foreach="order.lines" t-as="line" t-key="line.id">
+                            <t t-set="line_count" t-value="line_count + 1"/>
+                            <tr>
+                                <td class="pos-receipt-center-align">
+                                    <span class="price_display pos-receipt-center-align">
+                                        <t t-out="line.currencyDisplayPrice" />
+                                    </span>
+                                </td>
+                                <td class="pos-receipt-center-align">
+                                    <t t-out="line.currencyDisplayPriceUnit" />
+                                </td>
+                                <td class="pos-receipt-center-align">
+                                    <t t-out="line.qty"/>
+                                </td>
+                                <td class="pos-receipt-center-align">
+                                    <div t-out="line.getFullProductName()" />
+                                    <t t-if="line.getDiscount() !== 0">
+                                        <div class="pos-receipt-left-padding pos-receipt-right-align">
+                                            %<t t-out="line.getDiscount()" /> :خصم
+                                        </div>
+                                    </t>
+                                </td>
+                                <td class="pos-receipt-center-align">
+                                    <t t-out="line_count"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+                <br/>
+                <table class="fruit_order_data">
+                    <tr>
+                        <td class="fruit_order_data">
+                            <span t-out="formatCurrency(order.amountPaid)" class="pos-receipt-center-align"/>
+                        </td>
+                        <td style="padding-left: 22px;" class="fruit_order_tital">المدفوع</td>
+                    </tr>
+                    <tr>
+                        <td class="fruit_order_data">
+                            <span t-out="formatCurrency(order.remainingDue)" class="pos-receipt-center-align"/>
+                        </td>
+                        <td class="fruit_order_tital">المتبقى</td>
+                    </tr>
+                    <tr>
+                        <td class="fruit_order_data">
+                            <span t-out="formatCurrency(order.priceIncl)" class="pos-receipt-center-align"/>
+                        </td>
+                        <td class="fruit_order_tital">الاجمالى</td>
+                    </tr>
+                </table>
+                <br/>
+                <div class="fruit_recipt_footer pos-receipt-center-align">
+                    <span class="fruit_recipt_cashier"><t t-out="order.getCashierName()" /></span>
+                    <br/>
+                    <span>الأسعار شاملة ضريبة القيمة المضافة</span>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
