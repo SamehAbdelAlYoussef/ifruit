@@ -1,0 +1,49 @@
+.fruit_d_none_force{
+    display: none !important;
+}
+.pos-receipt{
+    font-size: 13px !important;
+}
+.pos-receipt .pos-receipt-logo {
+    width: 100% !important;
+}
+.pos-receipt .fruit_d_none{
+    display: none !important;
+}
+.pos-receipt .fruit_order_data{
+    width: 100%;
+}
+.pos-receipt .fruit_order_data tr td{
+    border: 1px solid;
+    padding: 3px;
+}
+.pos-receipt .fruit_order_data tr .fruit_order_data{
+    text-align: center;
+}
+.pos-receipt .fruit_order_data tr .fruit_order_tital{
+    text-align: right;
+    white-space: nowrap !important;
+}
+.pos-receipt .fruit_order_line_table{
+    width: 100%;
+}
+.pos-receipt .fruit_order_line_data{
+    width: 100%;
+    max-width: 100%;
+}
+.pos-receipt .fruit_order_line_data tr th{
+    border: 1px solid;
+    padding: 3px;
+}
+.pos-receipt .fruit_order_line_data tr td{
+    border: 1px solid;
+    padding: 3px;
+}
+.fruit_recipt_footer{
+    width: 100%;
+    border-top: 2px solid;  
+    padding-top: 5px; 
+}
+.fruit_recipt_footer .fruit_recipt_cashier{
+    font-weight: bold;
+}
