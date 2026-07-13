@@ -1,14 +1,8 @@
-.fruit_d_none_force{
-    display: none !important;
-}
 .pos-receipt{
     font-size: 13px !important;
 }
 .pos-receipt .pos-receipt-logo {
     width: 100% !important;
-}
-.pos-receipt .fruit_d_none{
-    display: none !important;
 }
 .pos-receipt .fruit_order_data{
     width: 100%;
