@@ -21,17 +21,30 @@ jobs:
           script: |
             cd /root/odoo19-docker
 
+            # 1. سحب أحدث الكود
             cd custom
             git reset --hard origin/main
             git pull origin main
             cd ..
 
+            # 2. ضبط صلاحيات الملفات الجديدة (أهم حاجة عشان تظهر)
+            echo "🔧 ضبط صلاحيات الإضافات..."
+            sudo chown -R 1000:1000 /root/odoo19-docker/custom/*
+
+            # 3. التصحيح التلقائي لمشكلة custom_select_create
+            echo "🔧 تطبيق التصحيح التلقائي..."
             docker compose exec -T odoo sed -i 's/"custom_select_create"/"custom_select_create_settle"/g' /opt/odoo/enterprise/pos_settle_due/static/src/app/views/view_dialogs/select_create_dialog.js
 
-            docker compose exec -T odoo odoo -u pos_settle_due --stop-after-init --no-http
+            # 4. تحديث كل الوحدات (يكتشف أي موديول جديد)
+            echo "🔄 تحديث الإضافات..."
+            docker compose exec -T odoo odoo -u all --stop-after-init --no-http
 
+            # 5. مسح كاش الأصول
+            echo "🧹 مسح الكاش..."
             docker compose exec -T db psql -U odoo -d ifruit -c "DELETE FROM ir_attachment WHERE name LIKE '%.assets_%' OR url LIKE '/web/assets/%';"
 
+            # 6. إعادة تشغيل Odoo
+            echo "🔄 إعادة تشغيل Odoo..."
             docker compose restart odoo
 
             echo "✅ تم نشر التحديثات بنجاح!"
