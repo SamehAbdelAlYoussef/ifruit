@@ -1,18 +1,23 @@
-name: Deploy ifruit Custom Addons
+name: Deploy ifruit Custom Addons (Production + Staging)
 
 on:
   push:
     branches:
       - main
+      - stage
 
 jobs:
-  deploy:
+  # ============================================================
+  # 1. Production Deployment (triggered on push to main)
+  # ============================================================
+  deploy-production:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
+      - name: Deploy to Production Server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -21,30 +26,77 @@ jobs:
           script: |
             cd /root/odoo19-docker
 
-            # 1. سحب أحدث الكود
+            # 1. Pull latest code from main branch
             cd custom
             git reset --hard origin/main
             git pull origin main
             cd ..
 
-            # 2. ضبط صلاحيات الملفات الجديدة (أهم حاجة عشان تظهر)
-            echo "🔧 ضبط صلاحيات الإضافات..."
+            # 2. Fix file permissions
+            echo "🔧 Fixing permissions..."
             sudo chown -R 1000:1000 /root/odoo19-docker/custom/*
 
-            # 3. التصحيح التلقائي لمشكلة custom_select_create
-            echo "🔧 تطبيق التصحيح التلقائي..."
+            # 3. Apply permanent patch for custom_select_create collision
+            echo "🔧 Applying custom_select_create patch..."
             docker compose exec -T odoo sed -i 's/"custom_select_create"/"custom_select_create_settle"/g' /opt/odoo/enterprise/pos_settle_due/static/src/app/views/view_dialogs/select_create_dialog.js
 
-            # 4. تحديث كل الوحدات (يكتشف أي موديول جديد)
-            echo "🔄 تحديث الإضافات..."
+            # 4. Update all modules (discovers new / updated addons)
+            echo "🔄 Updating modules..."
             docker compose exec -T odoo odoo -u all --stop-after-init --no-http
 
-            # 5. مسح كاش الأصول
-            echo "🧹 مسح الكاش..."
+            # 5. Clear asset cache from database
+            echo "🧹 Clearing asset cache..."
             docker compose exec -T db psql -U odoo -d ifruit -c "DELETE FROM ir_attachment WHERE name LIKE '%.assets_%' OR url LIKE '/web/assets/%';"
 
-            # 6. إعادة تشغيل Odoo
-            echo "🔄 إعادة تشغيل Odoo..."
+            # 6. Restart Odoo service
+            echo "🔄 Restarting Odoo..."
             docker compose restart odoo
 
-            echo "✅ تم نشر التحديثات بنجاح!"
+            echo "✅ Production deployment completed successfully!"
+
+  # ============================================================
+  # 2. Staging Deployment (triggered on push to stage)
+  # ============================================================
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/stage'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /root/odoo19-docker-stage
+
+            # 1. Pull latest code from stage branch
+            cd custom
+            git reset --hard origin/stage
+            git pull origin stage
+            cd ..
+
+            # 2. Fix file permissions
+            echo "🔧 Fixing permissions..."
+            sudo chown -R 1000:1000 /root/odoo19-docker-stage/custom/*
+
+            # 3. Apply permanent patch for custom_select_create collision
+            echo "🔧 Applying custom_select_create patch..."
+            docker compose exec -T odoo-stage sed -i 's/"custom_select_create"/"custom_select_create_settle"/g' /opt/odoo/enterprise/pos_settle_due/static/src/app/views/view_dialogs/select_create_dialog.js
+
+            # 4. Update all modules (discover new / updated addons) for staging DB
+            echo "🔄 Updating modules..."
+            docker compose exec -T odoo-stage odoo -u all --stop-after-init --no-http -d ifruit_stage
+
+            # 5. Clear asset cache from staging database
+            echo "🧹 Clearing asset cache..."
+            docker compose exec -T db-stage psql -U odoo_stage -d ifruit_stage -c "DELETE FROM ir_attachment WHERE name LIKE '%.assets_%' OR url LIKE '/web/assets/%';"
+
+            # 6. Restart Odoo staging service
+            echo "🔄 Restarting Odoo-stage..."
+            docker compose restart odoo-stage
+
+            echo "✅ Staging deployment completed successfully!"

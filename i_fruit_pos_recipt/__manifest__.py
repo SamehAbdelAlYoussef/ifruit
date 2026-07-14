@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'I Fruit Pos Recipt report',
+    'name': 'I Fruit Pos Recipt ',
     'version': '19.0.0.1',
     'category': 'Sales/Point of Sale',
     'summary': 'I Fruit Pos Recipt',
