@@ -5,6 +5,7 @@ stage-up
 stage-down
 
 nginx
+http://161.97.183.11:81/nginx/proxy
 https://npm.erp-ifruit.com/nginx/proxy
 email :: sameh@gmail.com
 password :: Ss010177294270
