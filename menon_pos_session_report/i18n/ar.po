@@ -1,0 +1,96 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* menon_pos_session_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-09-17 00:00+0000\n"
+"Last-Translator: Noptechs\n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: menon_pos_session_report
+#: model:ir.actions.report,name:menon_pos_session_report.action_report_pos_session_sales
+msgid "POS Session Sales Report"
+msgstr "تقرير مبيعات جلسة نقطة البيع"
+
+#. module: menon_pos_session_report
+#: model:ir.actions.report,print_report_name:menon_pos_session_report.action_report_pos_session_sales
+msgid "'Sales Report - ' + (object.name or '').replace('/', '-')"
+msgstr "'تقرير المبيعات - ' + (object.name or '').replace('/', '-')"
+
+#. module: menon_pos_session_report
+#: model:ir.actions.server,name:menon_pos_session_report.action_pos_session_sales_report_server
+msgid "Print POS Session Sales Report"
+msgstr "طباعة تقرير مبيعات جلسة نقطة البيع"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Sales Report"
+msgstr "تقرير المبيعات"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Opened:"
+msgstr "تاريخ الفتح:"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Cashier:"
+msgstr "الكاشير:"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Order Ref"
+msgstr "رقم الطلب"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Date"
+msgstr "التاريخ"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Customer"
+msgstr "العميل"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Subtotal"
+msgstr "المجموع قبل الضريبة"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Tax"
+msgstr "الضريبة"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Total"
+msgstr "الإجمالي"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Walk-in Customer"
+msgstr "عميل عابر"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Products Sold"
+msgstr "المنتجات المباعة"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Product"
+msgstr "المنتج"
+
+#. module: menon_pos_session_report
+#: model_terms:ir.ui.view,arch_db:menon_pos_session_report.report_pos_session_sales
+msgid "Qty"
+msgstr "الكمية"

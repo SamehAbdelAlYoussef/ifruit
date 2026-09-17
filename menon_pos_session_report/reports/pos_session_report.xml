@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="report_pos_session_sales">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="session">
+                <t t-call="web.external_layout">
+                    <div class="page" style="direction: rtl; font-family: 'Arial', sans-serif;">
+
+                        <style>
+                            .report-title { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+                            .report-subtitle { text-align: center; font-size: 16px; margin-bottom: 4px; }
+                            .report-meta { text-align: center; color: #666; font-size: 12px; margin-bottom: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            th, td { border: 1px solid #dee2e6; padding: 6px 10px; font-size: 12px; }
+                            thead.dark th { background-color: #343a40; color: #fff; }
+                            thead.gray th { background-color: #e9ecef; }
+                            tfoot td { background-color: #e9ecef; font-weight: bold; }
+                            .num { text-align: left; }
+                        </style>
+
+                        <div class="report-title">تقرير المبيعات</div>
+                        <div class="report-subtitle">جلسة نقطة البيع: <t t-esc="session.name"/></div>
+                        <div class="report-meta">
+                            تاريخ الفتح: <t t-esc="session.start_at" t-options='{"widget": "datetime"}'/>
+                            &#160;|&#160;
+                            الكاشير: <t t-esc="session.user_id.name"/>
+                        </div>
+
+                        <!-- جدول الطلبات -->
+                        <table>
+                            <thead class="dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>رقم الطلب</th>
+                                    <th>التاريخ</th>
+                                    <th>العميل</th>
+                                    <th class="num">قبل الضريبة</th>
+                                    <th class="num">الضريبة</th>
+                                    <th class="num">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="order_index" t-value="0"/>
+                                <t t-set="valid_orders" t-value="session.order_ids.filtered(lambda o: o.state not in ['cancel'])"/>
+                                <t t-foreach="valid_orders" t-as="order">
+                                    <t t-set="order_index" t-value="order_index + 1"/>
+                                    <tr>
+                                        <td><t t-esc="order_index"/></td>
+                                        <td><t t-esc="order.name"/></td>
+                                        <td><t t-esc="order.date_order" t-options='{"widget": "datetime"}'/></td>
+                                        <td><t t-esc="order.partner_id.name or 'عميل عابر'"/></td>
+                                        <td class="num">
+                                            <t t-esc="order.amount_total - order.amount_tax"
+                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                        </td>
+                                        <td class="num">
+                                            <t t-esc="order.amount_tax"
+                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                        </td>
+                                        <td class="num">
+                                            <t t-esc="order.amount_total"
+                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="num">الإجمالي</td>
+                                    <td class="num">
+                                        <t t-esc="sum(o.amount_total - o.amount_tax for o in valid_orders)"
+                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <t t-esc="sum(o.amount_tax for o in valid_orders)"
+                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
+                                    </td>
+                                    <td class="num">
+                                        <t t-esc="sum(o.amount_total for o in valid_orders)"
+                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ملخص المنتجات -->
+                        <div style="font-size:14px; font-weight:bold; margin: 16px 0 8px 0;">المنتجات المباعة</div>
+                        <table>
+                            <thead class="gray">
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th class="num">الكمية</th>
+                                    <th class="num">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="product_totals" t-value="{}"/>
+                                <t t-foreach="valid_orders" t-as="order">
+                                    <t t-foreach="order.lines" t-as="line">
+                                        <t t-set="key" t-value="line.product_id.name"/>
+                                        <t t-if="key not in product_totals">
+                                            <t t-set="dummy" t-value="product_totals.update({key: {'qty': 0, 'total': 0, 'currency': order.currency_id}})"/>
+                                        </t>
+                                        <t t-set="dummy" t-value="product_totals[key].update({'qty': product_totals[key]['qty'] + line.qty, 'total': product_totals[key]['total'] + line.price_subtotal_incl})"/>
+                                    </t>
+                                </t>
+                                <t t-foreach="product_totals.items()" t-as="item">
+                                    <tr>
+                                        <td><t t-esc="item[0]"/></td>
+                                        <td class="num"><t t-esc="item[1]['qty']"/></td>
+                                        <td class="num">
+                                            <t t-esc="item[1]['total']"
+                                               t-options='{"widget": "monetary", "display_currency": item[1]["currency"]}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_pos_session_sales" model="ir.actions.report">
+        <field name="name">POS Session Sales Report</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">menon_pos_session_report.report_pos_session_sales</field>
+        <field name="report_file">menon_pos_session_report.report_pos_session_sales</field>
+        <field name="print_report_name">'تقرير المبيعات - ' + (object.name or '').replace('/', '-')</field>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

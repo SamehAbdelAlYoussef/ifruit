@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Server action called from POS JS to return the report URL -->
+    <record id="action_pos_session_sales_report_server" model="ir.actions.server">
+        <field name="name">Print POS Session Sales Report</field>
+        <field name="model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'type': 'ir.actions.report',
+    'report_name': 'menon_pos_session_report.report_pos_session_sales',
+    'report_type': 'qweb-pdf',
+}
+        </field>
+    </record>
+</odoo>
