@@ -15,8 +15,13 @@ patch(ProductCard.prototype, {
         if (!product) {
             return "";
         }
-        const pricelist = this.pos.pricelist;
-        const price = product.getPrice(pricelist, 1);
-        return this.env.utils.formatCurrency(price);
+        const pricelist =
+            this.pos.getOrder()?.pricelist_id || this.pos.config?.pricelist_id || null;
+        try {
+            const price = product.getPrice(pricelist, 1);
+            return this.env.utils.formatCurrency(price);
+        } catch {
+            return "";
+        }
     },
 });
