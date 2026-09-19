@@ -3,118 +3,195 @@
 
     <template id="report_pos_session_sales">
         <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="session">
+            <t t-foreach="sessions_data" t-as="sd">
                 <t t-call="web.external_layout">
-                    <div class="page" style="direction: rtl; font-family: 'Arial', sans-serif;">
+                    <div class="page" style="direction: rtl; font-family: 'Arial', 'Tahoma', sans-serif; font-size: 14px; color: #000;">
 
                         <style>
-                            .report-title { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 4px; }
-                            .report-subtitle { text-align: center; font-size: 16px; margin-bottom: 4px; }
-                            .report-meta { text-align: center; color: #666; font-size: 12px; margin-bottom: 20px; }
-                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                            th, td { border: 1px solid #dee2e6; padding: 6px 10px; font-size: 12px; }
-                            thead.dark th { background-color: #343a40; color: #fff; }
-                            thead.gray th { background-color: #e9ecef; }
-                            tfoot td { background-color: #e9ecef; font-weight: bold; }
-                            .num { text-align: left; }
+                            .rpt-title    { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 4px; }
+                            .rpt-session  { text-align: center; font-size: 15px; margin-bottom: 16px; color: #333; }
+                            .rpt-date     { display: inline-block; border: 1px solid #444; padding: 4px 14px; font-size: 14px; margin-bottom: 24px; }
+                            .section      { width: 100%; border-collapse: collapse; border: 1px solid #bbb; margin-top: 18px; page-break-inside: avoid; }
+                            .section td, .section th { padding: 6px 10px; font-size: 14px; border: none; }
+                            .section .col-sep { border-left: 1px solid #bbb; }
+                            .section .col-mid { border-left: 1px solid #bbb; border-right: 1px solid #bbb; }
+                            .name-pad    { padding-right: 14px !important; }
+                            .name-pad-lg { padding-right: 30px !important; }
+                            .sec-hdr th  { background-color: #d8d8d8; font-weight: bold; font-size: 15px; text-align: right; padding: 7px 12px; }
+                            .cat-row     { border-top: 1px solid #ccc; background-color: #efefef; }
+                            .cat-row td  { font-weight: bold; font-size: 15px; padding-top: 7px; padding-bottom: 7px; }
+                            .prod-row td { font-size: 14px; color: #222; background-color: #fff; }
+                            .total-row   { border-top: 2px solid #888; }
+                            .total-row td{ font-weight: bold; font-size: 15px; }
+                            .grand-total { width: 100%; border-collapse: collapse; border-top: 2px solid #888; margin-top: 0; page-break-inside: avoid; }
+                            .grand-total td { font-weight: bold; font-size: 16px; padding: 8px 10px; border: none; }
+                            .sub-row td  { font-size: 14px; text-align: right; padding: 5px 14px; border: none; }
+                            .sub-row-bold td { font-size: 15px; font-weight: bold; text-align: right; padding: 5px 14px; border: none; }
+                            .lnum        { text-align: left; }
+                            .rtext       { text-align: right; }
                         </style>
 
-                        <div class="report-title">تقرير المبيعات</div>
-                        <div class="report-subtitle">جلسة نقطة البيع: <t t-esc="session.name"/></div>
-                        <div class="report-meta">
-                            تاريخ الفتح: <t t-esc="session.start_at" t-options='{"widget": "datetime"}'/>
-                            &#160;|&#160;
-                            الكاشير: <t t-esc="session.user_id.name"/>
+                        <!-- ===== TITLE ===== -->
+                        <div class="rpt-title">تقرير المبيعات اليومية</div>
+                        <div class="rpt-session">معرّف الجلسة: <t t-esc="sd['session'].name"/></div>
+                        <div>
+                            <span class="rpt-date">
+                                اعتبارًا من
+                                <t t-esc="sd['session'].start_at" t-options='{"widget": "datetime"}'/>
+                            </span>
                         </div>
 
-                        <!-- جدول الطلبات -->
-                        <table>
-                            <thead class="dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>رقم الطلب</th>
-                                    <th>التاريخ</th>
-                                    <th>العميل</th>
-                                    <th class="num">قبل الضريبة</th>
-                                    <th class="num">الضريبة</th>
-                                    <th class="num">الإجمالي</th>
-                                </tr>
+                        <br/>
+
+                        <!-- ===== المبيعات ===== -->
+                        <table class="section">
+                            <thead class="sec-hdr">
+                                <tr><th colspan="3">المبيعات</th></tr>
                             </thead>
                             <tbody>
-                                <t t-set="order_index" t-value="0"/>
-                                <t t-set="valid_orders" t-value="session.order_ids.filtered(lambda o: o.state not in ['cancel'])"/>
-                                <t t-foreach="valid_orders" t-as="order">
-                                    <t t-set="order_index" t-value="order_index + 1"/>
-                                    <tr>
-                                        <td><t t-esc="order_index"/></td>
-                                        <td><t t-esc="order.name"/></td>
-                                        <td><t t-esc="order.date_order" t-options='{"widget": "datetime"}'/></td>
-                                        <td><t t-esc="order.partner_id.name or 'عميل عابر'"/></td>
-                                        <td class="num">
-                                            <t t-esc="order.amount_total - order.amount_tax"
-                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
-                                        </td>
-                                        <td class="num">
-                                            <t t-esc="order.amount_tax"
-                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
-                                        </td>
-                                        <td class="num">
-                                            <t t-esc="order.amount_total"
-                                               t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                <t t-foreach="sd['categories']" t-as="cat">
+                                    <tr class="cat-row">
+                                        <td class="rtext name-pad" style="width:50%;"><t t-esc="cat['name']"/></td>
+                                        <td class="col-mid" style="width:25%;"><t t-esc="cat['qty']"/></td>
+                                        <td class="lnum col-sep" style="width:25%;">
+                                            <t t-esc="cat['total']"
+                                               t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
                                         </td>
                                     </tr>
+                                    <t t-foreach="cat['product_list']" t-as="prod">
+                                        <tr class="prod-row">
+                                            <td class="rtext name-pad-lg"><t t-esc="prod['name']"/></td>
+                                            <td class="col-mid"><t t-esc="prod['qty']"/> الوحدات</td>
+                                            <td class="lnum col-sep">
+                                                <t t-esc="prod['total']"
+                                                   t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
                                 </t>
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <td colspan="4" class="num">الإجمالي</td>
-                                    <td class="num">
-                                        <t t-esc="sum(o.amount_total - o.amount_tax for o in valid_orders)"
-                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
-                                    </td>
-                                    <td class="num">
-                                        <t t-esc="sum(o.amount_tax for o in valid_orders)"
-                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
-                                    </td>
-                                    <td class="num">
-                                        <t t-esc="sum(o.amount_total for o in valid_orders)"
-                                           t-options='{"widget": "monetary", "display_currency": session.currency_id}'/>
+                                <tr class="total-row">
+                                    <td class="rtext name-pad">الإجمالي</td>
+                                    <td class="col-mid"><t t-esc="sd['total_qty']"/></td>
+                                    <td class="lnum col-sep">
+                                        <t t-esc="sd['total_sales']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
 
-                        <!-- ملخص المنتجات -->
-                        <div style="font-size:14px; font-weight:bold; margin: 16px 0 8px 0;">المنتجات المباعة</div>
-                        <table>
-                            <thead class="gray">
-                                <tr>
-                                    <th>المنتج</th>
-                                    <th class="num">الكمية</th>
-                                    <th class="num">الإجمالي</th>
-                                </tr>
+                        <!-- ===== ضرائب المبيعات ===== -->
+                        <table class="section">
+                            <thead class="sec-hdr">
+                                <tr><th colspan="3">ضرائب المبيعات</th></tr>
                             </thead>
                             <tbody>
-                                <t t-set="product_totals" t-value="{}"/>
-                                <t t-foreach="valid_orders" t-as="order">
-                                    <t t-foreach="order.lines" t-as="line">
-                                        <t t-set="key" t-value="line.product_id.name"/>
-                                        <t t-if="key not in product_totals">
-                                            <t t-set="dummy" t-value="product_totals.update({key: {'qty': 0, 'total': 0, 'currency': order.currency_id}})"/>
-                                        </t>
-                                        <t t-set="dummy" t-value="product_totals[key].update({'qty': product_totals[key]['qty'] + line.qty, 'total': product_totals[key]['total'] + line.price_subtotal_incl})"/>
-                                    </t>
-                                </t>
-                                <t t-foreach="product_totals.items()" t-as="item">
+                                <t t-foreach="sd['tax_list']" t-as="tg">
                                     <tr>
-                                        <td><t t-esc="item[0]"/></td>
-                                        <td class="num"><t t-esc="item[1]['qty']"/></td>
-                                        <td class="num">
-                                            <t t-esc="item[1]['total']"
-                                               t-options='{"widget": "monetary", "display_currency": item[1]["currency"]}'/>
+                                        <td class="rtext" style="width:50%;"><t t-esc="tg['name']"/></td>
+                                        <td class="lnum col-sep" style="width:25%;">
+                                            <t t-esc="tg['tax']"
+                                               t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                        </td>
+                                        <td class="lnum col-sep" style="width:25%;">
+                                            <t t-esc="tg['total']"
+                                               t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
                                         </td>
                                     </tr>
                                 </t>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td class="rtext">الإجمالي</td>
+                                    <td class="lnum col-sep">
+                                        <t t-esc="sum(tg['tax'] for tg in sd['tax_list'])"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                    <td class="lnum col-sep">
+                                        <t t-esc="sd['total_sales']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ===== الدفعات ===== -->
+                        <table class="section">
+                            <thead class="sec-hdr">
+                                <tr><th colspan="2">الدفعات</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="sd['payment_list']" t-as="pm">
+                                    <tr>
+                                        <td class="rtext name-pad" style="width:60%;"><t t-esc="pm['name']"/></td>
+                                        <td class="lnum col-sep" style="width:40%;">
+                                            <t t-esc="pm['amount']"
+                                               t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td class="rtext" style="font-size:16px;">الإجمالي</td>
+                                    <td class="lnum col-sep" style="font-size:16px;">
+                                        <t t-esc="sd['payment_total']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ===== الخصومات ===== -->
+                        <table class="section">
+                            <thead class="sec-hdr">
+                                <tr><th colspan="2">الخصومات</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="sub-row">
+                                    <td colspan="2">عدد الخصومات:&#160;<t t-esc="sd['discount_count']"/></td>
+                                </tr>
+                                <tr class="sub-row">
+                                    <td colspan="2">
+                                        الخصومات:&#160;
+                                        <t t-esc="sd['total_discount']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- ===== التحكم في الجلسة ===== -->
+                        <table class="section">
+                            <thead class="sec-hdr">
+                                <tr><th colspan="2">التحكم في الجلسة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="sub-row-bold">
+                                    <td colspan="2">
+                                        الإجمالي:&#160;
+                                        <t t-esc="sd['total_sales']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                </tr>
+                                <tr class="sub-row-bold">
+                                    <td colspan="2">عدد المعاملات&#160;<t t-esc="sd['transaction_count']"/></td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td class="rtext" style="font-weight:bold;">الاسم</td>
+                                    <td class="lnum col-sep" style="font-weight:bold;">المتوقع</td>
+                                </tr>
+                                <tr>
+                                    <td class="rtext" style="font-size:14px;">
+                                        <t t-esc="sd['session'].user_id.name"/>&#160;<t t-esc="sd['session'].name"/>
+                                    </td>
+                                    <td class="lnum col-sep" style="font-size:14px;">
+                                        <t t-esc="sd['expected']"
+                                           t-options='{"widget":"monetary","display_currency":sd["currency"]}'/>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
 
@@ -125,12 +202,12 @@
     </template>
 
     <record id="action_report_pos_session_sales" model="ir.actions.report">
-        <field name="name">POS Session Sales Report</field>
+        <field name="name">تقرير المبيعات اليومية</field>
         <field name="model">pos.session</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">menon_pos_session_report.report_pos_session_sales</field>
         <field name="report_file">menon_pos_session_report.report_pos_session_sales</field>
-        <field name="print_report_name">'تقرير المبيعات - ' + (object.name or '').replace('/', '-')</field>
+        <field name="print_report_name">'تقرير المبيعات اليومية - ' + (object.name or '').replace('/', '-')</field>
         <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
         <field name="binding_type">report</field>
     </record>
