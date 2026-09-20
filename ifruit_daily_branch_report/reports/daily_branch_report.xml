@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_daily_branch">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page" style="direction:rtl;font-family:'Arial','Tahoma',sans-serif;font-size:13px;">
+                    <style>
+                        .rpt-title{text-align:center;font-size:22px;font-weight:bold;background:#2e5f8a;color:#fff;padding:8px;margin-bottom:0}
+                        .rpt-date{text-align:center;font-size:14px;background:#3b7ab8;color:#fff;padding:4px;margin-bottom:12px}
+                        .main-table{width:100%;border-collapse:collapse;border:1px solid #aaa}
+                        .main-table th{background:#b8cfe8;color:#000;font-weight:bold;font-size:13px;padding:6px 8px;border:1px solid #aaa;text-align:center}
+                        .main-table td{padding:5px 8px;border:1px solid #ddd;text-align:center}
+                        .main-table tr:nth-child(even) td{background:#f5f8fc}
+                        .total-row td{background:#d8e8f5;font-weight:bold;border-top:2px solid #2e5f8a}
+                        .neg{color:#c00}
+                        .pos{color:#060}
+                        .pie-title{text-align:center;font-size:16px;font-weight:bold;background:#2e5f8a;color:#fff;padding:6px;margin-top:20px;margin-bottom:8px}
+                        .pie-wrap{text-align:center}
+                    </style>
+
+                    <div class="rpt-title">شركة Ifruit</div>
+                    <div class="rpt-date"><t t-esc="date"/></div>
+
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <th>عدد الفروع</th>
+                                <th>الفرع</th>
+                                <th>الرصيد الافتتاحي</th>
+                                <th>المبيعات</th>
+                                <th>المصروفات</th>
+                                <th>صافي رصيد اليوم</th>
+                                <th>الرصيد الختامي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="branches" t-as="b">
+                                <tr>
+                                    <td><t t-esc="b['seq']"/></td>
+                                    <td style="text-align:right"><t t-esc="b['name']"/></td>
+                                    <td><t t-esc="'%.0f' % b['opening']"/></td>
+                                    <td><t t-esc="'%.0f' % b['sales']"/></td>
+                                    <td><t t-esc="'%.0f' % b['expenses']"/></td>
+                                    <td>
+                                        <t t-if="b['net_daily'] &lt; 0">
+                                            <span class="neg"><t t-esc="'%.0f-' % abs(b['net_daily'])"/></span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="pos"><t t-esc="'%.0f' % b['net_daily']"/></span>
+                                        </t>
+                                    </td>
+                                    <td>
+                                        <t t-if="b['closing'] &lt; 0">
+                                            <span class="neg"><t t-esc="'%.0f-' % abs(b['closing'])"/></span>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="'%.0f' % b['closing']"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2">الإجمالى</td>
+                                <td><t t-esc="'%.0f' % total['opening']"/></td>
+                                <td><t t-esc="'%.0f' % total['sales']"/></td>
+                                <td><t t-esc="'%.0f' % total['expenses']"/></td>
+                                <td>
+                                    <t t-if="total['net_daily'] &lt; 0">
+                                        <span class="neg"><t t-esc="'%.0f-' % abs(total['net_daily'])"/></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="pos"><t t-esc="'%.0f' % total['net_daily']"/></span>
+                                    </t>
+                                </td>
+                                <td>
+                                    <t t-if="total['closing'] &lt; 0">
+                                        <span class="neg"><t t-esc="'%.0f-' % abs(total['closing'])"/></span>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-esc="'%.0f' % total['closing']"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="pie-title">الرصيد الختامي</div>
+                    <div class="pie-wrap">
+                        <t t-raw="pie_svg"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_daily_branch" model="ir.actions.report">
+        <field name="name">تقرير الفروع اليومي</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ifruit_daily_branch_report.report_daily_branch</field>
+        <field name="report_file">ifruit_daily_branch_report.report_daily_branch</field>
+        <field name="print_report_name">'تقرير الفروع اليومي'</field>
+    </record>
+</odoo>
