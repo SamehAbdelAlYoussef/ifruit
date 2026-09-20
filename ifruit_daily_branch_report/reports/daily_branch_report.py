@@ -23,10 +23,9 @@ class DailyBranchReport(models.AbstractModel):
                 expense_lines = stmt_lines.filtered(lambda l: l.amount < 0)
                 expenses = abs(sum(expense_lines.mapped('amount')))
             else:
-                # Branch has no session on this day — show zeros
-                opening = sales = expenses = ice_cream = 0.0
+                opening = sales = expenses = 0.0
 
-            net_daily = sales - expenses - ice_cream
+            net_daily = sales - expenses
             closing = opening + net_daily
 
             branches.append({
