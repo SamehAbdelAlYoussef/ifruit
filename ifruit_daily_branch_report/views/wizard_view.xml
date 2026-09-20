@@ -4,13 +4,32 @@
         <field name="name">daily.branch.report.wizard.form</field>
         <field name="model">daily.branch.report.wizard</field>
         <field name="arch" type="xml">
-            <form string="تقرير الفروع اليومي">
-                <group>
-                    <field name="report_date" string="تاريخ التقرير"/>
-                </group>
+            <form string="تقرير الفروع اليومي" style="direction:rtl">
+                <sheet>
+                    <div class="row mb-2">
+                        <div class="col-auto">
+                            <label for="report_date" string="تاريخ التقرير"/>
+                            <field name="report_date" style="margin-right:8px"/>
+                            <button name="action_compute" string="عرض البيانات" type="object" class="btn btn-primary"/>
+                        </div>
+                    </div>
+
+                    <field name="line_ids" nolabel="1" widget="list" style="direction:rtl">
+                        <list string="الفروع" editable="0" decoration-muted="no_session == True">
+                            <field name="seq" string="#" width="50"/>
+                            <field name="name" string="الفرع"/>
+                            <field name="opening" string="الرصيد الافتتاحي" sum="الإجمالي"/>
+                            <field name="sales" string="المبيعات" sum="الإجمالي"/>
+                            <field name="expenses" string="المصروفات" sum="الإجمالي"/>
+                            <field name="net_daily" string="صافي رصيد اليوم" sum="الإجمالي"/>
+                            <field name="closing" string="الرصيد الختامي" sum="الإجمالي"/>
+                            <field name="no_session" column_invisible="1"/>
+                        </list>
+                    </field>
+                </sheet>
                 <footer>
-                    <button name="action_print" string="طباعة التقرير" type="object" class="btn-primary"/>
-                    <button string="إلغاء" class="btn-secondary" special="cancel"/>
+                    <button name="action_print" string="تصدير PDF" type="object" class="btn-success"/>
+                    <button string="إغلاق" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
