@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import math
+from datetime import datetime
 from odoo import models
 
 
@@ -11,16 +12,35 @@ class DailyBranchReport(models.AbstractModel):
         data = data or {}
         configs_data = data.get('configs_data', [])
         report_date = data.get('date', '')
+
+        # Parse date range (passed from wizard, already in UTC)
+        date_start_utc = datetime.strptime(data['date_start_utc'], '%Y-%m-%d %H:%M:%S') \
+            if data.get('date_start_utc') else None
+        date_end_utc = datetime.strptime(data['date_end_utc'], '%Y-%m-%d %H:%M:%S') \
+            if data.get('date_end_utc') else None
+
         branches = []
         for idx, item in enumerate(configs_data, 1):
             name = item['config_name']
             if item['session_id']:
                 session = self.env['pos.session'].sudo().browse(item['session_id'])
                 opening = session.cash_register_balance_start
-                valid_orders = session.order_ids.filtered(lambda o: o.state != 'cancel')
+
+                # Filter orders to the selected date range only
+                valid_orders = session.order_ids.filtered(
+                    lambda o: o.state != 'cancel'
+                    and (date_start_utc is None or o.date_order >= date_start_utc)
+                    and (date_end_utc is None or o.date_order <= date_end_utc)
+                )
                 sales = sum(o.amount_total for o in valid_orders)
+
+                # Filter expense lines to the selected date only
                 stmt_lines = session.statement_line_ids
-                expense_lines = stmt_lines.filtered(lambda l: l.amount < 0)
+                expense_lines = stmt_lines.filtered(
+                    lambda l: l.amount < 0
+                    and (date_start_utc is None or l.date >= date_start_utc.date())
+                    and (date_end_utc is None or l.date <= date_end_utc.date())
+                )
                 expenses = abs(sum(expense_lines.mapped('amount')))
             else:
                 opening = sales = expenses = 0.0
