@@ -65,15 +65,20 @@ class DailyBranchReportWizard(models.TransientModel):
 
         all_configs = self.env['pos.config'].search([], order='name asc')
 
-        # Sessions that STARTED on the selected date (most reliable day match)
-        day_sessions = self.env['pos.session'].search([
-            ('start_at', '>=', date_start_utc),
+        # Sessions overlapping with the selected date
+        # (started before end of day AND still open or closed after start of day)
+        overlapping = self.env['pos.session'].search([
             ('start_at', '<=', date_end_utc),
+            '|',
+            ('stop_at', '=', False),
+            ('stop_at', '>=', date_start_utc),
         ])
 
-        # Map config → session (prefer latest start if duplicates exist)
+        # For each config pick the session whose start_at is CLOSEST to (but not after)
+        # the end of the selected date → i.e. the latest-starting session that was active
+        # on that day.  Sorting ascending then overwriting means the latest wins.
         session_by_config = {}
-        for s in day_sessions.sorted('start_at'):
+        for s in overlapping.sorted('start_at'):
             session_by_config[s.config_id.id] = s
 
         configs_data = []
