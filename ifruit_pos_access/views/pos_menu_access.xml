@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Restrict POS backend navigation to managers only.
+        A basic POS user (group_pos_user) sees ONLY the Dashboard
+        (لوحة البيانات) so they can open their session and nothing else.
+    -->
+
+    <!-- Orders menu → managers only -->
+    <menuitem id="point_of_sale.menu_point_of_sale"
+        groups="point_of_sale.group_pos_manager"/>
+
+    <!-- Reporting menu → managers only -->
+    <menuitem id="point_of_sale.menu_point_rep"
+        groups="point_of_sale.group_pos_manager"/>
+</odoo>
